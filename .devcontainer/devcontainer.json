@@ -1,0 +1,23 @@
+// If you want to run as a non-root user in the container, see .devcontainer/docker-compose.yml.
+{
+	"name": "Existing Docker Compose (Extend)",
+	"dockerComposeFile": [
+		"../docker-compose.yml"
+	],
+	"service": "app",
+	"workspaceFolder": "/workspace",
+	// Set *default* container specific settings.json values on container create.
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+	"extensions": [
+		"ms-vscode.cpptools",
+		"twxs.cmake",
+		"shardulm94.trailing-spaces",
+		"slevesque.vscode-hexdump",
+		"oderwat.indent-rainbow"
+	],
+	"shutdownAction": "stopCompose",
+	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
+	// "remoteUser": "vscode"
+}
