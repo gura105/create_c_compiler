@@ -8,14 +8,19 @@
 	"workspaceFolder": "/workspace",
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
-		"terminal.integrated.shell.linux": "/bin/bash"
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"[makefile]": {
+			"editor.insertSpaces": false,
+			"editor.detectIndentation": false
+		}
 	},
 	"extensions": [
 		"ms-vscode.cpptools",
 		"twxs.cmake",
 		"shardulm94.trailing-spaces",
 		"slevesque.vscode-hexdump",
-		"oderwat.indent-rainbow"
+		"oderwat.indent-rainbow",
+		"matthewevers.compiler-explorer"
 	],
 	"shutdownAction": "stopCompose",
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
