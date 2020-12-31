@@ -196,6 +196,12 @@ typedef enum
     ND_SUB, // -
     ND_MUL, // *
     ND_DIV, // /
+    ND_GRE, // >
+    ND_LOW, // <
+    ND_EQU, // ==
+    ND_NEQ, // !=
+    ND_GRT, // >=
+    ND_LOT, // <=
     ND_NUM, // 整数
 } NodeKind;
 
@@ -231,6 +237,9 @@ Node *new_node_num(int val)
 
 // パーサーのプロトタイプ宣言
 Node *expr(void);
+Node *equality(void);
+Node *relational(void);
+Node *add(void);
 Node *mul(void);
 Node *unary(void);
 Node *primary(void);
@@ -238,6 +247,46 @@ Node *primary(void);
 // トークンを読み取って,抽象構文木を作成する
 // expr表現を展開する
 Node *expr()
+{
+    Node *node = equality();
+    return node;
+}
+
+Node *equality()
+{
+    Node *node = relational();
+
+    for (;;)
+    {
+        if (consume("=="))
+            node = new_node(ND_EQU, node, relational());
+        else if (consume("!="))
+            node = new_node(ND_NEQ, node, relational());
+        else
+            return node;
+    }
+}
+
+Node *relational()
+{
+    Node *node = add();
+
+    for (;;)
+    {
+        if (consume(">="))
+            node = new_node(ND_GRE, node, add());
+        else if (consume(">"))
+            node = new_node(ND_GRT, node, add());
+        else if (consume("<="))
+            node = new_node(ND_LOT, node, add());
+        else if (consume(">"))
+            node = new_node(ND_LOW, node, add());
+        else
+            return node;
+    }
+}
+
+Node *add()
 {
     // こちらを下記のif文より先に書いているため、左ノードを深さ優先で探索する
     Node *node = mul();
