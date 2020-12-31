@@ -25,6 +25,7 @@ struct Token
     Token *next;    // 次の入力トークン
     int val;        // kindがTK_NUMの場合、その数値
     char *str;      // トークンの文字列
+    int len;
 };
 
 // 現在注目しているトークン
@@ -60,22 +61,27 @@ void error_at(char *loc, char *fmt, ...)
 
 // 次のトークンが期待している記号のときには、トークンを一つ読み進めて真を返す。
 // それ以外の場合は偽を返す。
-bool consume(char op)
+bool consume(char *op)
 {
-    // トークンの種類が記号でない、またはトークン文字列の最初の文字がopでないとき
-    if (token->kind != TK_RESERVED || token->str[0] != op)
+    // トークンの種類が記号でない、またはトークン文字列長がトークナイズ時と異なるとき、またはトークンの文字列が予測値と異なるとき
+    if (token->kind != TK_RESERVED ||
+        strlen(op) != token->len ||
+        memcmp(token->str, op, token->len))
         return false;
+
     token = token->next;
     return true;
 }
 
 // 次のトークンが期待している記号のときには、トークンを一つ読み進める。
 // それ以外のエラーを報告する。
-void expect(char op)
+void expect(char *op)
 {
     // トークンの種類が記号でない、またはトークン文字列の最初の文字がopでないとき
-    if (token->kind != TK_RESERVED || token->str[0] != op)
-        error_at(token->str, "'%c'ではありません", op);
+    if (token->kind != TK_RESERVED ||
+        strlen(op) != token->len ||
+        memcmp(token->str, op, token->len))
+        error_at(token->str, "'%c'ではありません", *op);
     token = token->next;
 }
 
@@ -102,6 +108,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str)
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
     tok->str = str;
+    tok->len = strlen(str);
     cur->next = tok;
     return tok;
 }
@@ -124,7 +131,12 @@ Token *tokenize()
         }
 
         // 記号なら新たにトークンを作成してcurに接続する
-        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')')
+        if (*p == '+' ||
+            *p == '-' ||
+            *p == '*' ||
+            *p == '/' ||
+            *p == '(' ||
+            *p == ')')
         {
             cur = new_token(TK_RESERVED, cur, p++);
             continue;
