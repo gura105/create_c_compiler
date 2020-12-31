@@ -189,6 +189,7 @@ Node *new_node_num(int val)
 // パーサーのプロトタイプ宣言
 Node *expr(void);
 Node *mul(void);
+Node *unary(void);
 Node *primary(void);
 
 // トークンを読み取って,抽象構文木を作成する
@@ -214,19 +215,28 @@ Node *expr()
 // mul表現を展開する
 Node *mul()
 {
-    Node *node = primary();
+    Node *node = unary();
 
     for (;;)
     // 無限ループ
     {
         // 既存の親ノードを子ノードに入れ替えるテクニック
         if (consume('*'))
-            node = new_node(ND_MUL, node, primary());
+            node = new_node(ND_MUL, node, unary());
         else if (consume('/'))
-            node = new_node(ND_DIV, node, primary());
+            node = new_node(ND_DIV, node, unary());
         else
             return node;
     }
+}
+
+Node *unary()
+{
+    if (consume('+'))
+        return primary();
+    if (consume('-'))
+        return new_node(ND_SUB, new_node_num(0), primary());
+    return primary();
 }
 
 // トークンを読み取って,抽象構文木を作成する
