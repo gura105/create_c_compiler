@@ -66,7 +66,7 @@ bool consume(char *op)
     // トークンの種類が記号でない、またはトークン文字列長がトークナイズ時と異なるとき、またはトークンの文字列が予測値と異なるとき
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
-        memcmp(token->str, op, token->len))
+        memcmp(token->str, op, token->len) != 0)
         return false;
 
     token = token->next;
@@ -130,12 +130,43 @@ Token *tokenize()
         }
 
         // 記号なら新たにトークンを作成してcurに接続する
+        // 2文字のオペレータはstrncmpで比較する
+        if (strncmp(p, "==", 2) == 0)
+        {
+            cur = new_token(TK_RESERVED, cur, "==");
+            cur->len = 2;
+            p += 2;
+            continue;
+        }
+        if (strncmp(p, "!=", 2) == 0)
+        {
+            cur = new_token(TK_RESERVED, cur, "!=");
+            cur->len = 2;
+            p += 2;
+            continue;
+        }
+        if (strncmp(p, ">=", 2) == 0)
+        {
+            cur = new_token(TK_RESERVED, cur, ">=");
+            cur->len = 2;
+            p += 2;
+            continue;
+        }
+        if (strncmp(p, "<=", 2) == 0)
+        {
+            cur = new_token(TK_RESERVED, cur, "<=");
+            cur->len = 2;
+            p += 2;
+            continue;
+        }
         if (*p == '+' ||
             *p == '-' ||
             *p == '*' ||
             *p == '/' ||
             *p == '(' ||
-            *p == ')')
+            *p == ')' ||
+            *p == '>' ||
+            *p == '<')
         {
             cur = new_token(TK_RESERVED, cur, p++);
             cur->len = 1;
