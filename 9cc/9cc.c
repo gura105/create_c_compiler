@@ -124,7 +124,7 @@ Token *tokenize()
         }
 
         // 記号なら新たにトークンを作成してcurに接続する
-        if (*p == '+' || *p == '-')
+        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')')
         {
             cur = new_token(TK_RESERVED, cur, p++);
             continue;
@@ -146,6 +146,138 @@ Token *tokenize()
     return head.next;
 }
 
+// 抽象構文木のノードの種類
+typedef enum
+{
+    ND_ADD, // +
+    ND_SUB, // -
+    ND_MUL, // *
+    ND_DIV, // /
+    ND_NUM, // 整数
+} NodeKind;
+
+typedef struct Node Node;
+
+// 抽象構文木ノード
+struct Node
+{
+    NodeKind kind; // ノードの型
+    Node *lhs;     // 左子ノード
+    Node *rhs;     // 右子ノード
+    int val;       // kindがND_NUMのとき数値を格納する
+};
+
+// ツリーノードを新たに作成する
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
+{
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = kind;
+    node->lhs = lhs;
+    node->rhs = rhs;
+    return node;
+}
+
+// ツリーノードを新たに作成する(数値用)
+Node *new_node_num(int val)
+{
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_NUM;
+    node->val = val;
+    return node;
+}
+
+// パーサーのプロトタイプ宣言
+Node *expr(void);
+Node *mul(void);
+Node *primary(void);
+
+// トークンを読み取って,抽象構文木を作成する
+// expr表現を展開する
+Node *expr()
+{
+    // こちらを下記のif文より先に書いているため、左ノードを深さ優先で探索する
+    Node *node = mul();
+
+    // 無限ループ
+    for (;;)
+    {
+        if (consume('+'))
+            node = new_node(ND_ADD, node, mul());
+        else if (consume('-'))
+            node = new_node(ND_SUB, node, mul());
+        else
+            return node;
+    }
+}
+
+// トークンを読み取って,抽象構文木を作成する
+// mul表現を展開する
+Node *mul()
+{
+    Node *node = primary();
+
+    for (;;)
+    // 無限ループ
+    {
+        // 既存の親ノードを子ノードに入れ替えるテクニック
+        if (consume('*'))
+            node = new_node(ND_MUL, node, primary());
+        else if (consume('/'))
+            node = new_node(ND_DIV, node, primary());
+        else
+            return node;
+    }
+}
+
+// トークンを読み取って,抽象構文木を作成する
+// primary表現を展開する
+Node *primary()
+{
+    if (consume('('))
+    {
+        Node *node = expr();
+        expect(')');
+        return node;
+    }
+
+    return new_node_num(expect_number());
+}
+
+void gen(Node *node)
+{
+    // 数値ノードは終端ノードであるのでpushを行いreturnする
+    if (node->kind == ND_NUM)
+    {
+        printf("    push %d\n", node->val);
+        return;
+    }
+
+    gen(node->lhs);
+    gen(node->rhs);
+
+    printf("    pop rdi\n");
+    printf("    pop rax\n");
+
+    switch (node->kind)
+    {
+    case ND_ADD:
+        printf("    add rax, rdi\n");
+        break;
+    case ND_SUB:
+        printf("    sub rax, rdi\n");
+        break;
+    case ND_MUL:
+        printf("    imul rax, rdi\n");
+        break;
+    case ND_DIV:
+        printf("    cqo\n");
+        printf("    idiv rdi\n");
+        break;
+    }
+
+    printf("    push rax\n");
+}
+
 int main(int argc, char **argv)
 // argc -> コマンドも含めた引数の個数
 // **argv -> コマンドを文字列としたリスト
@@ -158,29 +290,19 @@ int main(int argc, char **argv)
     }
 
     user_input = argv[1];
-    token = tokenize();
+    // ソースコードをトークナイズする
+    token = tokenize(user_input);
+    // トークンを抽象構文木に変換する
+    Node *node = expr();
 
     printf(".intel_syntax noprefix\n");
     printf(".globl main\n");
     printf("main:\n");
 
-    // 式の最初は数でなければならない。
-    // それをチェックして最初のmov式を出力
-    printf("    mov rax, %d\n", expect_number());
+    // 抽象構文木からスタックマシンを使ってバイナリコードを生成
+    gen(node);
 
-    // `+ <数>`あるいは`- <数>`というトークンの並びを消費しつつアセンブリを出力
-    while (!at_eof())
-    {
-        if (consume('+'))
-        {
-            printf("    add rax, %ld\n", expect_number());
-            continue;
-        }
-
-        expect('-'); // consumeで書いてもよいではと思った。が、あとにerror_atの記載で、tokenに触りたくないから？
-        printf("    sub rax, %ld\n", expect_number());
-    }
-
+    printf("    pop rax\n");
     printf("    ret\n");
     return 0;
 }
