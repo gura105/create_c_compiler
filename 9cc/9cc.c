@@ -279,7 +279,7 @@ Node *relational()
             node = new_node(ND_GRT, node, add());
         else if (consume("<="))
             node = new_node(ND_LOE, node, add());
-        else if (consume(">"))
+        else if (consume("<"))
             node = new_node(ND_LOW, node, add());
         else
             return node;
@@ -385,15 +385,19 @@ void gen(Node *node)
         printf("    setne al\n");
         printf("    movzb rax, al\n");
         break;
-        // case ND_GRT: // >
-        //     printf("");
-        //     break;
-        // case ND_GRE: // >=
-        //     printf("");
-        //     break;
-        // case ND_LOW: // <
-        //     printf("");
-        //     break;
+    // case ND_GRT: // >
+    //     printf("    cmp rax, rdi\n");
+    //     printf("    setne al\n");
+    //     printf("    movzb rax, al\n");
+    //     break;
+    // case ND_GRE: // >=
+    //     printf("");
+    //     break;
+    case ND_LOW: // <
+        printf("    cmp rax, rdi\n");
+        printf("    setl al\n");
+        printf("    movzb rax, al\n");
+        break;
         // case ND_LOE: // <=
         //     printf("");
         //     break;

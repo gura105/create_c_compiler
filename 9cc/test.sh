@@ -26,5 +26,13 @@ assert 3 '2 * 6 / 4'
 assert 15 '5*(9-6)'
 assert 4 '(3+5)/2'
 assert 10 '-10+20'
+assert 1 '42==42'
+assert 0 '41==42'
+assert 1 '41!=42'
+assert 1 '(42==42)==1'
+assert 1 '5*(9-6)==15'
+assert 1 ' 2 < 3 '
+assert 0 ' 5*(9-6) < 14'
+
 
 echo OK
