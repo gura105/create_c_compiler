@@ -196,12 +196,12 @@ typedef enum
     ND_SUB, // -
     ND_MUL, // *
     ND_DIV, // /
-    ND_GRE, // >
+    ND_GRT, // >
     ND_LOW, // <
     ND_EQU, // ==
     ND_NEQ, // !=
-    ND_GRT, // >=
-    ND_LOT, // <=
+    ND_GRE, // >=
+    ND_LOE, // <=
     ND_NUM, // 整数
 } NodeKind;
 
@@ -278,7 +278,7 @@ Node *relational()
         else if (consume(">"))
             node = new_node(ND_GRT, node, add());
         else if (consume("<="))
-            node = new_node(ND_LOT, node, add());
+            node = new_node(ND_LOE, node, add());
         else if (consume(">"))
             node = new_node(ND_LOW, node, add());
         else
@@ -375,6 +375,28 @@ void gen(Node *node)
         printf("    cqo\n");
         printf("    idiv rdi\n");
         break;
+    case ND_EQU: // ==
+        printf("    cmp rax, rdi\n");
+        printf("    sete al\n");
+        printf("    movzb rax, al\n");
+        break;
+    case ND_NEQ: // !=
+        printf("    cmp rax, rdi\n");
+        printf("    setne al\n");
+        printf("    movzb rax, al\n");
+        break;
+        // case ND_GRT: // >
+        //     printf("");
+        //     break;
+        // case ND_GRE: // >=
+        //     printf("");
+        //     break;
+        // case ND_LOW: // <
+        //     printf("");
+        //     break;
+        // case ND_LOE: // <=
+        //     printf("");
+        //     break;
     }
 
     printf("    push rax\n");
