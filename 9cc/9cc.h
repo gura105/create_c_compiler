@@ -23,6 +23,11 @@ struct Token
     int len;
 };
 
+// 外部からのtoken操作関数
+bool consume(char *op);
+void expect(char *op);
+int expect_number();
+
 // 抽象構文木のノードの種類
 typedef enum
 {
