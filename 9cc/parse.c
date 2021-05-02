@@ -1,38 +1,11 @@
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "9cc.h"
 
 // プログラムの文字列
 char *user_input;
 
-// トークンの種類
-typedef enum
-{
-    TK_RESERVED, // 記号
-    TK_NUM,      // 整数トークン
-    TK_EOF,      // 入力の終わりを表すトークン
-} TokenKind;
-
-typedef struct Token Token;
-
-// トークン型
-struct Token
-{
-    TokenKind kind; // トークンの型
-    Token *next;    // 次の入力トークン
-    int val;        // kindがTK_NUMの場合、その数値
-    char *str;      // トークンの文字列
-    int len;
-};
-
 // 現在注目しているトークン
 Token *token;
 
-// エラーを報告するための関数
-// printfと同じ引数を取る
 void error(char *fmt, ...)
 {
     va_list ap;
@@ -189,33 +162,6 @@ Token *tokenize()
     return head.next;
 }
 
-// 抽象構文木のノードの種類
-typedef enum
-{
-    ND_ADD, // +
-    ND_SUB, // -
-    ND_MUL, // *
-    ND_DIV, // /
-    ND_GRT, // >
-    ND_LOW, // <
-    ND_EQU, // ==
-    ND_NEQ, // !=
-    ND_GRE, // >=
-    ND_LOE, // <=
-    ND_NUM, // 整数
-} NodeKind;
-
-typedef struct Node Node;
-
-// 抽象構文木ノード
-struct Node
-{
-    NodeKind kind; // ノードの型
-    Node *lhs;     // 左子ノード
-    Node *rhs;     // 右子ノード
-    int val;       // kindがND_NUMのとき数値を格納する
-};
-
 // ツリーノードを新たに作成する
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
 {
@@ -343,98 +289,4 @@ Node *primary()
     }
 
     return new_node_num(expect_number());
-}
-
-void gen(Node *node)
-{
-    // 数値ノードは終端ノードであるのでpushを行いreturnする
-    if (node->kind == ND_NUM)
-    {
-        printf("    push %d\n", node->val);
-        return;
-    }
-
-    gen(node->lhs);
-    gen(node->rhs);
-
-    printf("    pop rdi\n");
-    printf("    pop rax\n");
-
-    switch (node->kind)
-    {
-    case ND_ADD:
-        printf("    add rax, rdi\n");
-        break;
-    case ND_SUB:
-        printf("    sub rax, rdi\n");
-        break;
-    case ND_MUL:
-        printf("    imul rax, rdi\n");
-        break;
-    case ND_DIV:
-        printf("    cqo\n");
-        printf("    idiv rdi\n");
-        break;
-    case ND_EQU: // ==
-        printf("    cmp rax, rdi\n");
-        printf("    sete al\n");
-        printf("    movzb rax, al\n");
-        break;
-    case ND_NEQ: // !=
-        printf("    cmp rax, rdi\n");
-        printf("    setne al\n");
-        printf("    movzb rax, al\n");
-        break;
-    case ND_GRT: // >
-        printf("    cmp rdi, rax\n");
-        printf("    setl al\n");
-        printf("    movzb rax, al\n");
-        break;
-    case ND_GRE: // >=
-        printf("    cmp rdi, rax\n");
-        printf("    setle al\n");
-        printf("    movzb rax, al\n");
-        break;
-    case ND_LOW: // <
-        printf("    cmp rax, rdi\n");
-        printf("    setl al\n");
-        printf("    movzb rax, al\n");
-        break;
-    case ND_LOE: // <=
-        printf("    cmp rax, rdi\n");
-        printf("    setle al\n");
-        printf("    movzb rax, al\n");
-        break;
-    }
-
-    printf("    push rax\n");
-}
-
-int main(int argc, char **argv)
-// argc -> コマンドも含めた引数の個数
-// **argv -> コマンドを文字列としたリスト
-{
-    // 引数が1個以外のときにエラーにする
-    if (argc != 2)
-    {
-        fprintf(stderr, "引数の個数が正しくありません");
-        return 1;
-    }
-
-    user_input = argv[1];
-    // ソースコードをトークナイズする
-    token = tokenize(user_input);
-    // トークンを抽象構文木に変換する
-    Node *node = expr();
-
-    printf(".intel_syntax noprefix\n");
-    printf(".globl main\n");
-    printf("main:\n");
-
-    // 抽象構文木からスタックマシンを使ってバイナリコードを生成
-    gen(node);
-
-    printf("    pop rax\n");
-    printf("    ret\n");
-    return 0;
 }
