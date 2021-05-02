@@ -62,7 +62,6 @@ struct Node
     int offset;    // kindがND_LVARの場合のみ使う
 };
 
-extern Token *token;
 extern char *user_input;
 extern Node *code[];
 

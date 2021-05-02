@@ -13,6 +13,7 @@ int main(int argc, char **argv)
 
     user_input = argv[1];
     // ソースコードをトークナイズする
+    extern Token *token;
     token = tokenize(user_input);
 
     // トークンを抽象構文木に変換する
