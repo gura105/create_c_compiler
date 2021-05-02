@@ -46,6 +46,17 @@ bool consume(char *op)
     return true;
 }
 
+// 次のトークンが期待している値が識別子のときは、トークンを一つ読み進めて真を返す。
+// それ以外のはときは偽を返す。
+bool check_ident()
+{
+    if ('a' <= token->str[0] && token->str[0] <= 'z')
+    {
+        return true;
+    }
+    return false;
+}
+
 // 次のトークンが期待している記号のときには、トークンを一つ読み進める。
 // それ以外のエラーを報告する。
 void expect(char *op)
@@ -67,6 +78,15 @@ int expect_number()
     int val = token->val;
     token = token->next;
     return val;
+}
+
+char expect_ident()
+{
+    if (token->kind != TK_IDENT)
+        error_at(token->str, "識別子ではありません");
+    char ident = token->str[0];
+    token = token->next;
+    return ident;
 }
 
 // トークンの次の要素が最終要素を指している時に真を返す
@@ -99,6 +119,13 @@ Token *tokenize()
         if (isspace(*p))
         {
             p++;
+            continue;
+        }
+
+        if ('a' <= *p && *p <= 'z')
+        {
+            cur = new_token(TK_IDENT, cur, p++);
+            cur->len = 1;
             continue;
         }
 
@@ -139,7 +166,9 @@ Token *tokenize()
             *p == '(' ||
             *p == ')' ||
             *p == '>' ||
-            *p == '<')
+            *p == '<' ||
+            *p == '=' ||
+            *p == ';')
         {
             cur = new_token(TK_RESERVED, cur, p++);
             cur->len = 1;

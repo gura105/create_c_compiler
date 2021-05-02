@@ -19,8 +19,21 @@ Node *new_node_num(int val)
     return node;
 }
 
+Node *new_node_ident(char ident)
+{
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_LVAR;
+    node->offset = (ident - 'a' + 1) * 8;
+    return node;
+}
+
+Node *code[100];
+
 // パーサーのプロトタイプ宣言
+void program();
+Node *stmt();
 Node *expr(void);
+Node *assign();
 Node *equality(void);
 Node *relational(void);
 Node *add(void);
@@ -28,16 +41,37 @@ Node *mul(void);
 Node *unary(void);
 Node *primary(void);
 
-Node *parse()
+void parse()
 {
-    Node *node = expr();
+    program();
 }
 
 // トークンを読み取って,抽象構文木を作成する
-// expr表現を展開する
+void program()
+{
+    int i = 0;
+    while (!at_eof())
+        code[i++] = stmt();
+    code[i] = NULL;
+}
+
+Node *stmt()
+{
+    Node *node = expr();
+    expect(";");
+    return node;
+}
+
 Node *expr()
 {
+    return assign();
+}
+
+Node *assign()
+{
     Node *node = equality();
+    if (consume("="))
+        node = new_node(ND_ASSIGN, node, assign());
     return node;
 }
 
@@ -129,6 +163,11 @@ Node *primary()
         Node *node = expr();
         expect(")");
         return node;
+    }
+
+    if (check_ident())
+    {
+        return new_node_ident(expect_ident());
     }
 
     return new_node_num(expect_number());
