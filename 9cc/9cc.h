@@ -23,8 +23,6 @@ struct Token
     int len;
 };
 
-Token *tokenize();
-
 // 抽象構文木のノードの種類
 typedef enum
 {
@@ -51,9 +49,9 @@ struct Node
     int val;       // kindがND_NUMのとき数値を格納する
 };
 
-Node *expr();
-
 extern Token *token;
 extern char *user_input;
 
+Token *tokenize();
+Node *parse();
 void gen(Node *node);

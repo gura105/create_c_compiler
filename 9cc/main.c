@@ -15,7 +15,7 @@ int main(int argc, char **argv)
     // ソースコードをトークナイズする
     token = tokenize(user_input);
     // トークンを抽象構文木に変換する
-    Node *node = expr();
+    Node *node = parse();
 
     printf(".intel_syntax noprefix\n");
     printf(".globl main\n");

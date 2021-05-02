@@ -190,6 +190,11 @@ Node *mul(void);
 Node *unary(void);
 Node *primary(void);
 
+Node *parse()
+{
+    Node *node = expr();
+}
+
 // トークンを読み取って,抽象構文木を作成する
 // expr表現を展開する
 Node *expr()
