@@ -28,10 +28,21 @@ struct Token
 void error(char *fmt, ...);
 bool consume(char *op);
 bool check_ident();
+Token *consume_ident();
 void expect(char *op);
 int expect_number();
 char expect_ident();
 bool at_eof();
+
+// ローカル変数の型
+typedef struct LVar LVar;
+struct LVar
+{
+    LVar *next; // 次の変数かNULL
+    char *name; // 変数の名前
+    int len;    // 名前の長さ
+    int offset; // RBPからのオフセット
+};
 
 // 抽象構文木のノードの種類
 typedef enum

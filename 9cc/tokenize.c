@@ -46,11 +46,24 @@ bool consume(char *op)
     return true;
 }
 
+// 次のトークンが識別子の場合、トークンを一つ進めてその識別子トークンを返す。
+// それ以外はNULLを返す。
+Token *consume_ident()
+{
+    if (token->kind != TK_IDENT)
+    {
+        return NULL;
+    }
+    Token *tok = token;
+    token = token->next;
+    return tok;
+}
+
 // 次のトークンが期待している値が識別子のときは、トークンを一つ読み進めて真を返す。
 // それ以外のはときは偽を返す。
 bool check_ident()
 {
-    if ('a' <= token->str[0] && token->str[0] <= 'z')
+    if (token->kind == TK_IDENT)
     {
         return true;
     }

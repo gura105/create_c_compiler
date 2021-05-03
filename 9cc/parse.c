@@ -1,5 +1,7 @@
 #include "9cc.h"
 
+LVar *locals;
+
 // ツリーノードを新たに作成する
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
 {
@@ -19,11 +21,45 @@ Node *new_node_num(int val)
     return node;
 }
 
-Node *new_node_ident(char ident)
+LVar *new_lvar(Token *tok)
+{
+    LVar *lvar = calloc(1, sizeof(LVar));
+    lvar->name = tok->str;
+    lvar->len = tok->len;
+    // 最初のローカル変数登録のときはlocalsはnull
+    if (locals == NULL)
+        lvar->offset = 8;
+    else
+        lvar->offset = locals->offset + 8;
+    lvar->next = locals;
+    locals = lvar;
+    return lvar;
+}
+
+LVar *find_lvar(Token *tok)
+{
+    for (LVar *var = locals; var; var = var->next)
+        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) //memcmpは真のときの戻り地が0のため!で否定している
+            return var;
+    return NULL;
+}
+
+Node *new_node_ident(Token *tok)
 {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
-    node->offset = (ident - 'a' + 1) * 8;
+
+    // offsetはlvarチェーンに同名の変数が存在するかで変わる
+    LVar *lvar = find_lvar(tok);
+    if (lvar)
+    {
+        node->offset = lvar->offset;
+    }
+    else
+    {
+        lvar = new_lvar(tok);
+        node->offset = lvar->offset;
+    }
     return node;
 }
 
@@ -165,9 +201,10 @@ Node *primary()
         return node;
     }
 
-    if (check_ident())
+    Token *tok = consume_ident();
+    if (tok)
     {
-        return new_node_ident(expect_ident());
+        return new_node_ident(tok);
     }
 
     return new_node_num(expect_number());
