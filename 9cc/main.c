@@ -23,11 +23,18 @@ int main(int argc, char **argv)
     printf(".globl main\n");
     printf("main:\n");
 
+    extern LVar *locals;
+    int offset;
+    if (locals != NULL)
+        offset = locals->offset;
+    else
+        offset = 0;
+
     // プロローグ
-    // 変数26個分の領域を確保する
+    // ローカル変数分の領域を確保する
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, 208\n");
+    printf("  sub rsp, %d\n", offset);
 
     // 先頭の式から順にコード生成
     for (int i = 0; code[i]; i++)
