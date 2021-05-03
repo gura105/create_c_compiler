@@ -11,6 +11,7 @@ typedef enum
     TK_IDENT,    // 識別子
     TK_NUM,      // 整数トークン
     TK_EOF,      // 入力の終わりを表すトークン
+    TK_RETURN    // リターン文
 } TokenKind;
 
 // トークン型
@@ -29,6 +30,7 @@ void error(char *fmt, ...);
 bool consume(char *op);
 bool check_ident();
 Token *consume_ident();
+bool consume_keyword(char *op, TokenKind tk);
 void expect(char *op);
 int expect_number();
 char expect_ident();
@@ -60,6 +62,7 @@ typedef enum
     ND_ASSIGN, // =
     ND_LVAR,   // ローカル変数
     ND_NUM,    // 整数
+    ND_RETURN  // return
 } NodeKind;
 
 // 抽象構文木ノード

@@ -59,8 +59,23 @@ Token *consume_ident()
     return tok;
 }
 
+// 次のトークンが特定のキーワードの場合、トークンを一つ進めて真を返す。
+// それ以外の場合は偽を返す。
+bool consume_keyword(char *op, TokenKind tk)
+{
+    // トークンの種類が記号でない、またはトークン文字列長がトークナイズ時と異なるとき、またはトークンの文字列が予測値と異なるとき
+    if (token->kind != tk ||
+        strlen(op) != token->len ||
+        memcmp(token->str, op, token->len) != 0)
+        return false;
+
+    token = token->next;
+    return true;
+}
+
 // 次のトークンが期待している値が識別子のときは、トークンを一つ読み進めて真を返す。
 // それ以外のはときは偽を返す。
+// TODO: 使われていないので削除すること
 bool check_ident()
 {
     if (token->kind == TK_IDENT)
@@ -130,6 +145,14 @@ Token *new_token(TokenKind kind, Token *cur, char *str)
     return tok;
 }
 
+int is_alnum(char c)
+{
+    return ('a' <= c && c <= 'z') ||
+           ('A' <= c && c <= 'Z') ||
+           ('0' <= c && c <= '9') ||
+           (c == '_');
+}
+
 // 入力文字列(の先頭アドレス)pをトークナイズしてそれを返す
 Token *tokenize()
 {
@@ -147,6 +170,18 @@ Token *tokenize()
             continue;
         }
 
+        // return文を読み込む
+        // "returnx"のような変数を誤って"return x"と解釈しないように
+        // is_alnumで判別している
+        if (!strncmp(p, "return", 6) && !is_alnum(p[6]))
+        {
+            cur = new_token(TK_RETURN, cur, p);
+            cur->len = 6;
+            p += 6;
+            continue;
+        }
+
+        // alnumのときは識別子として認識する
         if (is_ident1(*p))
         {
             char *start = p;

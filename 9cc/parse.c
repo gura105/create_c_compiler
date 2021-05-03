@@ -21,6 +21,8 @@ Node *new_node_num(int val)
     return node;
 }
 
+// 途中でLVarの操作関数が混ざると見づらいので、
+// プロトタイプ宣言して整理したほうが良い？
 LVar *new_lvar(Token *tok)
 {
     LVar *lvar = calloc(1, sizeof(LVar));
@@ -83,6 +85,8 @@ void parse()
 }
 
 // トークンを読み取って,抽象構文木を作成する
+
+// program = stmt*
 void program()
 {
     int i = 0;
@@ -91,18 +95,30 @@ void program()
     code[i] = NULL;
 }
 
+// stmt    = expr ";" | "return" expr ";"
 Node *stmt()
 {
-    Node *node = expr();
-    expect(";");
-    return node;
+    if (consume_keyword("return", TK_RETURN))
+    {
+        Node *node = new_node(ND_RETURN, expr(), NULL);
+        expect(";");
+        return node;
+    }
+    else
+    {
+        Node *node = expr();
+        expect(";");
+        return node;
+    }
 }
 
+// expr = assign
 Node *expr()
 {
     return assign();
 }
 
+// assign = equality ("=" assign)?
 Node *assign()
 {
     Node *node = equality();
@@ -111,6 +127,7 @@ Node *assign()
     return node;
 }
 
+// equality = relational ("==" relational | "!=" relational)*
 Node *equality()
 {
     Node *node = relational();
@@ -126,6 +143,7 @@ Node *equality()
     }
 }
 
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node *relational()
 {
     Node *node = add();
@@ -145,12 +163,13 @@ Node *relational()
     }
 }
 
+// add = mul ("+" mul | "-" mul)*
 Node *add()
 {
-    // こちらを下記のif文より先に書いているため、左ノードを深さ優先で探索する
     Node *node = mul();
 
     // 無限ループ
+    // nodeをnew_nodeの左側に付け加えていくため、左側が深くなる
     for (;;)
     {
         if (consume("+"))
@@ -162,8 +181,7 @@ Node *add()
     }
 }
 
-// トークンを読み取って,抽象構文木を作成する
-// mul表現を展開する
+// mul = unary ("*" unary | "/" unary)*
 Node *mul()
 {
     Node *node = unary();
@@ -181,6 +199,7 @@ Node *mul()
     }
 }
 
+// unary = ("+" | "-")? primary
 Node *unary()
 {
     if (consume("+"))
@@ -190,8 +209,7 @@ Node *unary()
     return primary();
 }
 
-// トークンを読み取って,抽象構文木を作成する
-// primary表現を展開する
+// primary = num | ident | "(" expr ")"
 Node *primary()
 {
     if (consume("("))
