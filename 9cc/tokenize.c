@@ -95,6 +95,18 @@ bool at_eof()
     return token->kind == TK_EOF;
 }
 
+// Returns true if c is valid as the first character of an identifier.
+static bool is_ident1(char c)
+{
+    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
+// Returns true if c is valid as a non-first character of an identifier.
+static bool is_ident2(char c)
+{
+    return is_ident1(c) || ('0' <= c && c <= '9');
+}
+
 // 新しいトークンを作成してcurに繋げる
 Token *new_token(TokenKind kind, Token *cur, char *str)
 {
@@ -122,10 +134,15 @@ Token *tokenize()
             continue;
         }
 
-        if ('a' <= *p && *p <= 'z')
+        if (is_ident1(*p))
         {
-            cur = new_token(TK_IDENT, cur, p++);
-            cur->len = 1;
+            char *start = p;
+            do
+            {
+                p++;
+            } while (is_ident2(*p));
+            cur = new_token(TK_IDENT, cur, start);
+            cur->len = p - start;
             continue;
         }
 
