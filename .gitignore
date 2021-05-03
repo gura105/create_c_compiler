@@ -1,3 +1,7 @@
 # 無関係のdirを無視
 bin/
 src/
+debug.c
+settings.json
+*.o
+9cc
