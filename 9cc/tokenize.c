@@ -153,6 +153,11 @@ int is_alnum(char c)
            (c == '_');
 }
 
+bool is_reserved(char *op, char *res)
+{
+    return strncmp(op, res, strlen(res)) == 0;
+}
+
 // 入力文字列(の先頭アドレス)pをトークナイズしてそれを返す
 Token *tokenize()
 {
@@ -220,30 +225,12 @@ Token *tokenize()
 
         // 記号なら新たにトークンを作成してcurに接続する
         // 2文字のオペレータはstrncmpで比較する
-        if (strncmp(p, "==", 2) == 0)
+        if (is_reserved(p, "==") |
+            is_reserved(p, "!=") |
+            is_reserved(p, ">=") |
+            is_reserved(p, "<="))
         {
-            cur = new_token(TK_RESERVED, cur, "==");
-            cur->len = 2;
-            p += 2;
-            continue;
-        }
-        if (strncmp(p, "!=", 2) == 0)
-        {
-            cur = new_token(TK_RESERVED, cur, "!=");
-            cur->len = 2;
-            p += 2;
-            continue;
-        }
-        if (strncmp(p, ">=", 2) == 0)
-        {
-            cur = new_token(TK_RESERVED, cur, ">=");
-            cur->len = 2;
-            p += 2;
-            continue;
-        }
-        if (strncmp(p, "<=", 2) == 0)
-        {
-            cur = new_token(TK_RESERVED, cur, "<=");
+            cur = new_token(TK_RESERVED, cur, p);
             cur->len = 2;
             p += 2;
             continue;
@@ -259,8 +246,9 @@ Token *tokenize()
             *p == '=' ||
             *p == ';')
         {
-            cur = new_token(TK_RESERVED, cur, p++);
+            cur = new_token(TK_RESERVED, cur, p);
             cur->len = 1;
+            p += 1;
             continue;
         }
 
