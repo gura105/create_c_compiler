@@ -114,9 +114,11 @@ Node *stmt()
         expect("(");
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_IF;
-        node->lhs = expr();
+        node->cond = expr();
         expect(")");
-        node->rhs = stmt();
+        node->then = stmt();
+        if (consume_keyword("else", TK_ELSE))
+            node->els = stmt();
 
         return node;
     }

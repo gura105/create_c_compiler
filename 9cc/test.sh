@@ -51,6 +51,9 @@ assert 10 'ans = 10; return ans; return 5;'
 assert 0 "ans = 1; if(ans == 1) return 0; return 1;"
 assert 1 "ans = 0; if(ans == 1) return 0; return 1;"
 assert 2 "ans = 0; if(ans == 0) ans = ans + 1; if(ans == 1) ans = ans + 1; return ans;"
+assert 0 "cond = 0; if(cond == 0) return 0; else return 1;"
+assert 1 "cond = 1; if(cond == 0) return 0; else return 1;"
+assert 1 "cond = 1; if(cond == 0) return 0; else if(cond == 1) return 1; else return 2;"
 
 
 echo OK

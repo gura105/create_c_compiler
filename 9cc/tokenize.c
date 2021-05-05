@@ -191,7 +191,7 @@ Token *tokenize()
 
         if (!strncmp(p, "else", 4) && !is_alnum(p[4]))
         {
-            cur = new_token(TK_IF, cur, p);
+            cur = new_token(TK_ELSE, cur, p);
             cur->len = 4;
             p += 4;
             continue;

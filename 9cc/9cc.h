@@ -74,10 +74,16 @@ typedef struct Node Node;
 struct Node
 {
     NodeKind kind; // ノードの型
-    Node *lhs;     // 左子ノード
-    Node *rhs;     // 右子ノード
-    int val;       // kindがND_NUMのとき数値を格納する
-    int offset;    // kindがND_LVARの場合のみ使う
+
+    Node *lhs; // 左子ノード
+    Node *rhs; // 右子ノード
+
+    Node *cond; // if: 条件式
+    Node *then; // if: 条件式が真のとき
+    Node *els;  // if: 条件式が偽のとき
+
+    int val;    // kindがND_NUMのとき数値を格納する
+    int offset; // kindがND_LVARの場合のみ使う
 };
 
 extern char *user_input;

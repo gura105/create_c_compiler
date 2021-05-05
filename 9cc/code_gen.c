@@ -43,12 +43,14 @@ void gen(Node *node)
         printf("  ret\n");
         return;
     case ND_IF:
-        gen(node->lhs);
-        printf("  pop rax\n");               // if文の結果をraxに格納
-        printf("  cmp rax, 0\n");            // if文の評価値の審議を判定(真: 0, 偽: 1)
-        printf("  je .Lend%d\n", label_cnt); // (評価値) == 1なら.Lendxxxラベルにジャンブ
-        gen(node->rhs);
-        printf(".Lend%d:\n", label_cnt);
+        gen(node->cond);
+        printf("  pop rax\n");                // if文の結果をraxに格納
+        printf("  cmp rax, 0\n");             // if文の評価値の審議を判定(真: 0, 偽: 1)
+        printf("  je .Lelse%d\n", label_cnt); // (評価値) == 1なら.Lendxxxラベルにジャンブ
+        gen(node->then);
+        printf(".Lelse%d:\n", label_cnt);
+        if (node->els)
+            gen(node->els);
         label_cnt++;
         return;
     }
