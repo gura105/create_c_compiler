@@ -102,12 +102,14 @@ void program()
 //         | "return" expr ";"
 Node *stmt()
 {
+    // return
     if (consume_keyword("return", TK_RETURN))
     {
         Node *node = new_node(ND_RETURN, expr(), NULL);
         expect(";");
         return node;
     }
+    // if文
     else if (consume_keyword("if", TK_IF))
     {
         // ")"を消費するためにnew_node関数を使っていない
@@ -119,7 +121,17 @@ Node *stmt()
         node->then = stmt();
         if (consume_keyword("else", TK_ELSE))
             node->els = stmt();
-
+        return node;
+    }
+    // while文
+    else if (consume_keyword("while", TK_WHILE))
+    {
+        expect("(");
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
         return node;
     }
     else

@@ -49,8 +49,20 @@ void gen(Node *node)
         printf("  je .Lelse%d\n", label_cnt); // (評価値) == 1なら.Lendxxxラベルにジャンブ
         gen(node->then);
         printf(".Lelse%d:\n", label_cnt);
+        label_cnt++;
         if (node->els)
             gen(node->els);
+        return;
+    case ND_WHILE:
+        printf(".Llpstart%d:\n", label_cnt);
+        gen(node->lhs);                        // condの結果をpush
+        printf("  pop rax\n");                 // if文の結果をraxに格納(condの結果をpop)
+        printf("  cmp rax, 0\n");              // if文の評価値の審議を判定(真: 0, 偽: 1)
+        printf("  je .Llpend%d\n", label_cnt); // (評価値) == 1なら.Llpendxxxラベルにジャンブ
+        gen(node->rhs);                        // stmtの結果をpush
+        printf("  jmp .Llpstart%d\n", label_cnt);
+        printf(".Llpend%d:\n", label_cnt);
+        // printf("  push rax\n");
         label_cnt++;
         return;
     }
@@ -107,6 +119,5 @@ void gen(Node *node)
         printf("    movzb rax, al\n");
         break;
     }
-
     printf("    push rax\n");
 }

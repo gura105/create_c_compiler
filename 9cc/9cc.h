@@ -13,7 +13,8 @@ typedef enum
     TK_EOF,      // 入力の終わりを表すトークン
     TK_RETURN,   // リターン文
     TK_IF,       // IF文
-    TK_ELSE      // ELSE文
+    TK_ELSE,     // ELSE文
+    TK_WHILE     // WHILE文
 } TokenKind;
 
 // トークン型
@@ -66,7 +67,8 @@ typedef enum
     ND_NUM,    // 整数
     ND_RETURN, // return
     ND_IF,     // if
-    ND_ELSE    //else
+    ND_ELSE,   //else
+    ND_WHILE   //while
 } NodeKind;
 
 // 抽象構文木ノード
