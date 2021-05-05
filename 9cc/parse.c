@@ -95,13 +95,29 @@ void program()
     code[i] = NULL;
 }
 
-// stmt    = expr ";" | "return" expr ";"
+// stmt    = expr ";"
+//         | "if" "(" expr ")" stmt ("else" stmt)?
+//         | "while" "(" expr ")" stmt
+//         | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+//         | "return" expr ";"
 Node *stmt()
 {
     if (consume_keyword("return", TK_RETURN))
     {
         Node *node = new_node(ND_RETURN, expr(), NULL);
         expect(";");
+        return node;
+    }
+    else if (consume_keyword("if", TK_IF))
+    {
+        // ")"を消費するためにnew_node関数を使っていない
+        expect("(");
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
+
         return node;
     }
     else

@@ -181,6 +181,22 @@ Token *tokenize()
             continue;
         }
 
+        if (!strncmp(p, "if", 2) && !is_alnum(p[2]))
+        {
+            cur = new_token(TK_IF, cur, p);
+            cur->len = 2;
+            p += 2;
+            continue;
+        }
+
+        if (!strncmp(p, "else", 4) && !is_alnum(p[4]))
+        {
+            cur = new_token(TK_IF, cur, p);
+            cur->len = 4;
+            p += 4;
+            continue;
+        }
+
         // alnumのときは識別子として認識する
         if (is_ident1(*p))
         {

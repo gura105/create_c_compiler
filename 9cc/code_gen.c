@@ -1,5 +1,7 @@
 #include "9cc.h"
 
+static int label_cnt = 0;
+
 void gen_lval(Node *node)
 {
     if (node->kind != ND_LVAR)
@@ -39,6 +41,15 @@ void gen(Node *node)
         printf("  mov rsp, rbp\n");
         printf("  pop rbp\n");
         printf("  ret\n");
+        return;
+    case ND_IF:
+        gen(node->lhs);
+        printf("  pop rax\n");               // if文の結果をraxに格納
+        printf("  cmp rax, 0\n");            // if文の評価値の審議を判定(真: 0, 偽: 1)
+        printf("  je .Lend%d\n", label_cnt); // (評価値) == 1なら.Lendxxxラベルにジャンブ
+        gen(node->rhs);
+        printf(".Lend%d:\n", label_cnt);
+        label_cnt++;
         return;
     }
 

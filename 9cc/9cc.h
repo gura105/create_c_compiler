@@ -11,7 +11,9 @@ typedef enum
     TK_IDENT,    // 識別子
     TK_NUM,      // 整数トークン
     TK_EOF,      // 入力の終わりを表すトークン
-    TK_RETURN    // リターン文
+    TK_RETURN,   // リターン文
+    TK_IF,       // IF文
+    TK_ELSE      // ELSE文
 } TokenKind;
 
 // トークン型
@@ -62,7 +64,9 @@ typedef enum
     ND_ASSIGN, // =
     ND_LVAR,   // ローカル変数
     ND_NUM,    // 整数
-    ND_RETURN  // return
+    ND_RETURN, // return
+    ND_IF,     // if
+    ND_ELSE    //else
 } NodeKind;
 
 // 抽象構文木ノード

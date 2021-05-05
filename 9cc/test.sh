@@ -48,6 +48,9 @@ assert 1 '_foo = 1; _foo = 2; _foo == 2;'
 assert 1 'a=1; b=1; c=1; d=1; e=1; f=1; g=1; h=1; i=1; j=1; k=1; l=1; m=1; n=1; o=1; p=1; q=1; c=r; s=1; t=1; u=1; v=1; w=1; x=1; y=1; z=1; aa=1;'
 assert 6 'foo = 2; bar = 3; return foo * bar;'
 assert 10 'ans = 10; return ans; return 5;'
+assert 0 "ans = 1; if(ans == 1) return 0; return 1;"
+assert 1 "ans = 0; if(ans == 1) return 0; return 1;"
+assert 2 "ans = 0; if(ans == 0) ans = ans + 1; if(ans == 1) ans = ans + 1; return ans;"
 
 
 echo OK
