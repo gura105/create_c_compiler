@@ -68,7 +68,8 @@ typedef enum
     ND_RETURN, // return
     ND_IF,     // if
     ND_ELSE,   //else
-    ND_WHILE   //while
+    ND_WHILE,  //while
+    ND_BLOCK   // { }
 } NodeKind;
 
 // 抽象構文木ノード
@@ -83,6 +84,8 @@ struct Node
     Node *cond; // if: 条件式
     Node *then; // if: 条件式が真のとき
     Node *els;  // if: 条件式が偽のとき
+
+    Node *stmt[100]; // ブロックに含まれる式のリスト
 
     int val;    // kindがND_NUMのとき数値を格納する
     int offset; // kindがND_LVARの場合のみ使う

@@ -54,8 +54,16 @@ assert 2 "ans = 0; if(ans == 0) ans = ans + 1; if(ans == 1) ans = ans + 1; retur
 assert 0 "cond = 0; if(cond == 0) return 0; else return 1;"
 assert 1 "cond = 1; if(cond == 0) return 0; else return 1;"
 assert 1 "cond = 1; if(cond == 0) return 0; else if(cond == 1) return 1; else return 2;"
-assert 1 "while(0==0) return 1; return 0;"
 assert 10 "mer = 2; cnt = 0; while(cnt <= 9) cnt = cnt + mer; return cnt;"
+assert 1 "while(0==0) return 1; return 0;"
+assert 6 "a = 0; while(a<=5){a = a + 1;} return a;"
+assert 1 "if(1==1){return 1;} return 0;"
+assert 0 "ans = 0; if(ans==1){} return ans;"
+assert 0 "ans = 0; return ans;"
+assert 0 "ans = 0; if(ans==1)0==0; return ans;"
+assert 0 "ans = 0; if(ans==1){ans = 1;} return ans;"
+assert 1 "ans = 0; if(ans==0){ans = 1;} return ans;"
+assert 2 "clk = 0; cnt = 0; while(clk < 5){clk = clk + 1; if(clk == 2){cnt = cnt + 1;} else if(clk == 4){cnt = cnt + 1;}} return cnt;"
 
 
 echo OK

@@ -96,14 +96,32 @@ void program()
 }
 
 // stmt    = expr ";"
+//         | "{" stmt* "}"
 //         | "if" "(" expr ")" stmt ("else" stmt)?
 //         | "while" "(" expr ")" stmt
 //         | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 //         | "return" expr ";"
 Node *stmt()
 {
+
+    if (consume("{"))
+    {
+        Node *node = new_node(ND_BLOCK, NULL, NULL);
+        for (int i = 0;; i++)
+        {
+            if (consume("}"))
+            {
+                node->stmt[i + 1] == NULL;
+                return node;
+            }
+            if (at_eof()) // "{"に対応する"}"が見つからない場合パースエラーとする
+                expect("}");
+            node->stmt[i] = stmt();
+        }
+    }
+
     // return
-    if (consume_keyword("return", TK_RETURN))
+    else if (consume_keyword("return", TK_RETURN))
     {
         Node *node = new_node(ND_RETURN, expr(), NULL);
         expect(";");
