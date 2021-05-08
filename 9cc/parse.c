@@ -127,6 +127,34 @@ Node *stmt()
         expect(";");
         return node;
     }
+    // for文
+    else if (consume_keyword("for", TK_FOR))
+    {
+        expect("(");
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_FOR;
+        if (!consume(";"))
+        {
+            node->init = expr();
+            expect(";");
+        }
+
+        if (!consume(";"))
+        {
+            node->end = expr();
+            expect(";");
+        }
+
+        if (!consume(")"))
+        {
+            node->inc = expr();
+            expect(")");
+        }
+
+        node->loop = stmt();
+
+        return node;
+    }
     // if文
     else if (consume_keyword("if", TK_IF))
     {

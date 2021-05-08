@@ -78,6 +78,21 @@ bool consume_keyword(char *op, TokenKind tk)
     return true;
 }
 
+// 現在指しているトークンの次のトークンが期待している記号のときは真を返す
+// それ以外は偽を返す
+bool predict(char *op)
+{
+    Token *next_tk = token->next;
+    if (next_tk == NULL)
+        return false;
+    if (next_tk->kind != TK_RESERVED ||
+        strlen(op) != next_tk->len ||
+        memcmp(next_tk->str, op, next_tk->len) != 0)
+        return false;
+
+    return true;
+}
+
 // 次のトークンが期待している値が識別子のときは、トークンを一つ読み進めて真を返す。
 // それ以外のはときは偽を返す。
 // TODO: 使われていないので削除すること

@@ -1,5 +1,6 @@
 #include "9cc.h"
 
+static int for_label_cnt = 0;
 static int while_label_cnt = 0;
 static int else_label_cnt = 0;
 
@@ -45,6 +46,23 @@ void gen(Node *node)
         printf("  pop rbp\n");
         printf("  ret\n");
         return;
+    case ND_FOR:
+        gen(node->init);
+        printf(".Lforstart%d:\n", for_label_cnt);
+
+        gen(node->end);
+        printf("  pop rax\n");                      // for文終了判定式の結果をraxに格納
+        printf("  cmp rax, 0\n");                   // for文終了判定式の審議を判定(真: 0, 偽: 1)
+        printf("  push rax\n");                     // for文の評価結果を再びstackトップに戻す
+        printf("  je .Lforend%d\n", for_label_cnt); // (評価値) == 1なら.Lendxxxラベルにジャンブ
+
+        gen(node->loop);
+        gen(node->inc);
+        printf("  jmp .Lforstart%d\n", for_label_cnt);
+
+        printf(".Lforend%d:\n", for_label_cnt);
+        for_label_cnt++;
+        return;
     case ND_IF:
         gen(node->cond);
         printf("  pop rax\n");                     // if文の結果をraxに格納
@@ -67,7 +85,6 @@ void gen(Node *node)
         gen(node->rhs);                              // stmtの結果をpush
         printf("  jmp .Llpstart%d\n", while_label_cnt);
         printf(".Llpend%d:\n", while_label_cnt);
-        // printf("  push rax\n");
         while_label_cnt++;
         return;
     case ND_BLOCK:

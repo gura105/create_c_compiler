@@ -64,6 +64,8 @@ assert 0 "ans = 0; if(ans==1)0==0; return ans;"
 assert 0 "ans = 0; if(ans==1){ans = 1;} return ans;"
 assert 1 "ans = 0; if(ans==0){ans = 1;} return ans;"
 assert 2 "clk = 0; cnt = 0; while(clk < 5){clk = clk + 1; if(clk == 2){cnt = cnt + 1;} else if(clk == 4){cnt = cnt + 1;}} return cnt;"
+assert 6 "b = 0; for( a= 0; a <= 5; a = a+1 ){ b = b + 1;} return b;"
+assert 2 "cnt = 0; for(clk = 0; clk <= 5; clk = clk + 1){if(clk == 2){cnt = cnt + 1;} else if(clk == 4){cnt = cnt + 1;}} return cnt;"
 
 
 echo OK

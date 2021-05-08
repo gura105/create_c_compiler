@@ -38,6 +38,7 @@ bool consume_keyword(char *op, TokenKind tk);
 void expect(char *op);
 int expect_number();
 char expect_ident();
+bool predict();
 bool at_eof();
 
 // ローカル変数の型
@@ -85,6 +86,11 @@ struct Node
     Node *cond; // if: 条件式
     Node *then; // if: 条件式が真のとき
     Node *els;  // if: 条件式が偽のとき
+
+    Node *init; // for: 初期化式
+    Node *end;  // for: 終了条件
+    Node *inc;  // for: インクリメント式
+    Node *loop; // for: 実行式
 
     Node *stmt[100]; // ブロックに含まれる式のリスト
 
