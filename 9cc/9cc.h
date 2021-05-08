@@ -67,6 +67,7 @@ typedef enum
     ND_ASSIGN, // =
     ND_LVAR,   // ローカル変数
     ND_NUM,    // 整数
+    ND_FUNC,   // 関数
     ND_RETURN, // return
     ND_IF,     // if
     ND_WHILE,  //while
@@ -94,6 +95,8 @@ struct Node
 
     Node *stmt[100]; // ブロックに含まれる式のリスト
 
+    Token *tok; // Token構造体
+
     int val;    // kindがND_NUMのとき数値を格納する
     int offset; // kindがND_LVARの場合のみ使う
 };
@@ -105,3 +108,9 @@ Token *tokenize();
 void parse();
 
 void gen(Node *node);
+
+/*
+    string.c
+*/
+
+char *slice_str(char *str, int start, int end);

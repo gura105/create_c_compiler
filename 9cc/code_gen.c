@@ -17,6 +17,7 @@ void gen_lval(Node *node)
 void gen(Node *node)
 {
     Node **p = node->stmt;
+    char *func_name = NULL;
 
     // 数値ノードは終端ノードであるのでpushを行いreturnする
     switch (node->kind)
@@ -93,6 +94,12 @@ void gen(Node *node)
             printf("  pop rax\n");
             gen(*p);
         }
+        return;
+    case ND_FUNC:
+        func_name = slice_str(
+            node->tok->str, 0, node->tok->len - 1);
+        printf("  pop rax\n");
+        printf("  call %s\n", func_name);
         return;
     }
 

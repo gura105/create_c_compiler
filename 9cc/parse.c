@@ -285,9 +285,12 @@ Node *unary()
     return primary();
 }
 
-// primary = num | ident | "(" expr ")"
+// primary = num
+//         | ident ("(" ")")?
+//         | "(" expr ")"
 Node *primary()
 {
+    // "(" expr ")""
     if (consume("("))
     {
         Node *node = expr();
@@ -295,10 +298,20 @@ Node *primary()
         return node;
     }
 
+    // ident ("(" ")")?
     Token *tok = consume_ident();
     if (tok)
     {
-        return new_node_ident(tok);
+        if (consume("("))
+        {
+            Node *node = calloc(1, sizeof(Node));
+            node->kind = ND_FUNC;
+            node->tok = tok;
+            expect(")");
+            return node;
+        }
+        else
+            return new_node_ident(tok);
     }
 
     return new_node_num(expect_number());
