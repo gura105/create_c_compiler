@@ -143,34 +143,9 @@ bool at_eof()
     return token->kind == TK_EOF;
 }
 
-// Returns true if c is valid as the first character of an identifier.
-static bool is_ident1(char c)
-{
-    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
-}
-
-// Returns true if c is valid as a non-first character of an identifier.
-static bool is_ident2(char c)
-{
-    return is_ident1(c) || ('0' <= c && c <= '9');
-}
-
-int is_alnum(char c)
-{
-    return ('a' <= c && c <= 'z') ||
-           ('A' <= c && c <= 'Z') ||
-           ('0' <= c && c <= '9') ||
-           (c == '_');
-}
-
 static bool is_kwd(char *op, char *kwd)
 {
     return !strncmp(op, kwd, strlen(kwd)) && !is_alnum(op[strlen(kwd)]);
-}
-
-bool check_str(char *op, char *str)
-{
-    return strncmp(op, str, strlen(str)) == 0;
 }
 
 TokenKind kwd_map(char *op)

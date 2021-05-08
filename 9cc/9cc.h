@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+    tokenize.c
+*/
+
 typedef enum
 {
     TK_RESERVED, // 記号
@@ -29,6 +33,8 @@ struct Token
     int len;
 };
 
+extern char *user_input;
+
 // 外部からのtoken操作関数
 void error(char *fmt, ...);
 bool consume(char *op);
@@ -40,6 +46,12 @@ int expect_number();
 char expect_ident();
 bool predict();
 bool at_eof();
+
+Token *tokenize();
+
+/*
+    parse.c
+*/
 
 // ローカル変数の型
 typedef struct LVar LVar;
@@ -101,16 +113,20 @@ struct Node
     int offset; // kindがND_LVARの場合のみ使う
 };
 
-extern char *user_input;
-extern Node *code[];
-
-Token *tokenize();
 void parse();
 
-void gen(Node *node);
+/*
+    code_gen.c
+*/
+
+void code_gen();
 
 /*
     string.c
 */
 
 char *slice_str(char *str, int start, int end);
+bool is_ident1(char c);
+bool is_ident2(char c);
+int is_alnum(char c);
+bool check_str(char *op, char *str);
