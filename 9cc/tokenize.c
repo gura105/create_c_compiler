@@ -2,6 +2,11 @@
 
 // プログラムの文字列
 char *user_input;
+char *kwd_list[] = {"return", "if", "else", "while", "for", NULL};
+char *reserved_list[] = {"==", "!=", ">=", "<=",
+                         "+", "-", "*", "/",
+                         "(", ")", ">", "<", "=", ";", "{", "}",
+                         NULL};
 
 // 現在注目しているトークン
 Token *token;
@@ -135,16 +140,6 @@ static bool is_ident2(char c)
     return is_ident1(c) || ('0' <= c && c <= '9');
 }
 
-// 新しいトークンを作成してcurに繋げる
-Token *new_token(TokenKind kind, Token *cur, char *str)
-{
-    Token *tok = calloc(1, sizeof(Token));
-    tok->kind = kind;
-    tok->str = str;
-    cur->next = tok;
-    return tok;
-}
-
 int is_alnum(char c)
 {
     return ('a' <= c && c <= 'z') ||
@@ -153,9 +148,38 @@ int is_alnum(char c)
            (c == '_');
 }
 
-bool is_reserved(char *op, char *res)
+static bool is_kwd(char *op, char *kwd)
 {
-    return strncmp(op, res, strlen(res)) == 0;
+    return !strncmp(op, kwd, strlen(kwd)) && !is_alnum(op[strlen(kwd)]);
+}
+
+bool check_str(char *op, char *str)
+{
+    return strncmp(op, str, strlen(str)) == 0;
+}
+
+TokenKind kwd_map(char *op)
+{
+    if (check_str(op, "return"))
+        return TK_RETURN;
+    if (check_str(op, "if"))
+        return TK_IF;
+    if (check_str(op, "else"))
+        return TK_ELSE;
+    if (check_str(op, "while"))
+        return TK_WHILE;
+    if (check_str(op, "for"))
+        return TK_FOR;
+}
+
+// 新しいトークンを作成してcurに繋げる
+Token *new_token(TokenKind kind, Token *cur, char *str)
+{
+    Token *tok = calloc(1, sizeof(Token));
+    tok->kind = kind;
+    tok->str = str;
+    cur->next = tok;
+    return tok;
 }
 
 // 入力文字列(の先頭アドレス)pをトークナイズしてそれを返す
@@ -175,93 +199,64 @@ Token *tokenize()
             continue;
         }
 
-        // return文を読み込む
-        // "returnx"のような変数を誤って"return x"と解釈しないように
-        // is_alnumで判別している
-        if (!strncmp(p, "return", 6) && !is_alnum(p[6]))
+        // 数値をトークナイズ
+        if (isdigit(*p))
         {
-            cur = new_token(TK_RETURN, cur, p);
-            cur->len = 6;
-            p += 6;
+            cur = new_token(TK_NUM, cur, p);
+            cur->val = strtol(p, &p, 10);
             continue;
         }
 
-        if (!strncmp(p, "if", 2) && !is_alnum(p[2]))
+        // keywordをトークナイズ
+        int flg_kwd = 0;
+        char **kwd_p = kwd_list;
+        for (kwd_p; *kwd_p != NULL; kwd_p++)
         {
-            cur = new_token(TK_IF, cur, p);
-            cur->len = 2;
-            p += 2;
-            continue;
+            if (is_kwd(p, *kwd_p))
+            {
+                cur = new_token(kwd_map(*kwd_p), cur, p);
+                cur->len = strlen(*kwd_p);
+                p += strlen(*kwd_p);
+                flg_kwd = 1;
+                break;
+            }
         }
-
-        if (!strncmp(p, "else", 4) && !is_alnum(p[4]))
-        {
-            cur = new_token(TK_ELSE, cur, p);
-            cur->len = 4;
-            p += 4;
+        // keywordのtokenize処理が終了したらwhile文を最初からやり直す
+        if (flg_kwd)
             continue;
-        }
 
-        if (!strncmp(p, "while", 5) && !is_alnum(p[5]))
-        {
-            cur = new_token(TK_WHILE, cur, p);
-            cur->len = 5;
-            p += 5;
-            continue;
-        }
-
+        // 識別子をトークナイズ
         // alnumのときは識別子として認識する
         if (is_ident1(*p))
         {
             char *start = p;
-            do
+            while (is_ident2(*p))
             {
                 p++;
-            } while (is_ident2(*p));
+            }
             cur = new_token(TK_IDENT, cur, start);
             cur->len = p - start;
             continue;
         }
 
-        // 記号なら新たにトークンを作成してcurに接続する
-        // 2文字のオペレータはstrncmpで比較する
-        if (is_reserved(p, "==") |
-            is_reserved(p, "!=") |
-            is_reserved(p, ">=") |
-            is_reserved(p, "<="))
+        // keywordをtokenize
+        // 入力文字列がkeywordと一致するかfor文で探索する
+        int flg_reserved = 0;
+        char **reseved_p = reserved_list;
+        for (reseved_p; *reseved_p != NULL; reseved_p++)
         {
-            cur = new_token(TK_RESERVED, cur, p);
-            cur->len = 2;
-            p += 2;
-            continue;
+            if (check_str(p, *reseved_p))
+            {
+                cur = new_token(TK_RESERVED, cur, p);
+                cur->len = strlen(*reseved_p);
+                p += strlen(*reseved_p);
+                flg_reserved = 1;
+                break;
+            }
         }
-        if (*p == '+' ||
-            *p == '-' ||
-            *p == '*' ||
-            *p == '/' ||
-            *p == '(' ||
-            *p == ')' ||
-            *p == '>' ||
-            *p == '<' ||
-            *p == '=' ||
-            *p == ';' ||
-            *p == '{' ||
-            *p == '}')
-        {
-            cur = new_token(TK_RESERVED, cur, p);
-            cur->len = 1;
-            p += 1;
+        // reservedのtokenize処理が終了したらwhile文を最初からやり直す
+        if (flg_reserved)
             continue;
-        }
-
-        if (isdigit(*p))
-        {
-            // 新たなトークンの作成とカーソルの移動を同時に行っている
-            cur = new_token(TK_NUM, cur, p);
-            // 値を初期化している
-            cur->val = strtol(p, &p, 10);
-            continue;
-        }
 
         error_at(p, "トークナイズ出来ません");
     }

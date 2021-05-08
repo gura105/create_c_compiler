@@ -14,7 +14,8 @@ typedef enum
     TK_RETURN,   // リターン文
     TK_IF,       // IF文
     TK_ELSE,     // ELSE文
-    TK_WHILE     // WHILE文
+    TK_WHILE,    // WHILE文
+    TK_FOR       // FOR文
 } TokenKind;
 
 // トークン型
@@ -67,8 +68,8 @@ typedef enum
     ND_NUM,    // 整数
     ND_RETURN, // return
     ND_IF,     // if
-    ND_ELSE,   //else
     ND_WHILE,  //while
+    ND_FOR,    // for
     ND_BLOCK   // { }
 } NodeKind;
 
